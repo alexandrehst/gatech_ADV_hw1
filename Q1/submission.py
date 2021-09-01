@@ -61,7 +61,13 @@ class Graph:
         add a tuple (id, name) representing a node to self.nodes if it does not already exist
         The graph should not contain any duplicate nodes
         """
-        return NotImplemented
+
+        search_list = [index for (index, node) in enumerate(self.nodes) if node[0]== id]
+
+        if search_list:
+            return
+        
+        self.nodes.append( (id, name))
 
 
     def add_edge(self, source: str, target: str) -> None:
@@ -71,21 +77,28 @@ class Graph:
         Where 'source' is the id of the source node and 'target' is the id of the target node
         e.g., for two nodes with ids 'a' and 'b' respectively, add the tuple ('a', 'b') to self.edges
         """
-        return NotImplemented
+        if source == target:
+            return
+
+        search_list = [index for (index, node) in enumerate(self.edges) if node == (source,target) or node == (target,source)]
+        if search_list:
+            return
+
+        self.edges.append( (source, target) )
 
 
     def total_nodes(self) -> int:
         """
         Returns an integer value for the total number of nodes in the graph
         """
-        return NotImplemented
+        return len(self.nodes)
 
 
     def total_edges(self) -> int:
         """
         Returns an integer value for the total number of edges in the graph
         """
-        return NotImplemented
+        return len(self.edges)
 
 
     def max_degree_nodes(self) -> dict:
@@ -96,8 +109,41 @@ class Graph:
         e.g. {'a': 8}
         or {'a': 22, 'b': 22}
         """
-        return NotImplemented
+        all_nodes = self.nodes_egde_count()
 
+        all_nodes = dict(sorted(all_nodes.items(), key=lambda item: item[1], reverse=True))
+
+        max_val = list(all_nodes.values())[0]
+
+        max_degree = {}
+        for k, v in all_nodes.items():
+            if v == max_val:
+                max_degree[k] = v
+            else:
+                break
+        
+        return max_degree
+
+    def count_leaf_nodes(self):
+        all_nodes = self.nodes_egde_count()
+        leaf_nodes = dict(filter(lambda x: x[1] == 1, all_nodes.items()))
+
+        return len(leaf_nodes)
+
+    def nodes_egde_count(self):
+
+        all_nodes = {}
+        for (index, edge) in enumerate(self.edges):
+            if all_nodes.get(edge[0]):
+                all_nodes[edge[0] ] += 1
+            else:
+                all_nodes[edge[0] ] = 1
+
+            if all_nodes.get(edge[1]):
+                all_nodes[edge[1] ] += 1
+            else:
+                all_nodes[ edge[1] ] = 1
+        return all_nodes
 
     def print_nodes(self):
         """
@@ -166,10 +212,10 @@ class  TMDBAPIUtils:
         conn_string = ''
 
         if conn_name == 'cast':
-            conn_string = "/3/movie/{}/credits?api_key={}".format(id, self.api_key)
+            conn_string = "/3/movie/{}/credits?api_key={}&language=language=en-US".format(id, self.api_key)
 
         if conn_name == 'credits':
-            conn_string = "/3/person/{}/movie_credits?api_key={}".format(id, self.api_key)
+            conn_string = "/3/person/{}/movie_credits?api_key={}&language=language=en-US".format(id, self.api_key)
 
         req.request("GET", conn_string, payload, headers)
         res = req.getresponse()
@@ -216,18 +262,10 @@ class  TMDBAPIUtils:
 
         if limit is not None:
             cast = list(filter(lambda c: c['order'] < limit, cast))
-        """
-        for item in cast:
-            if ( 
-                 (exclude_ids is not None and item['id'] not in exclude_ids) or
-                 exclude_ids is None
-                ) and (
-                  (limit is not None and item['order'] < limit) or
-                  limit is None
-                ):
 
-                new_cast.append( item )
-        """
+        for actor in cast:
+            actor['name'] = actor['name'].replace(",", "")
+
         return cast
 
 
@@ -372,9 +410,7 @@ def return_argo_lite_snapshot()->str:
     """
     Return the shared URL of your published graph in Argo-Lite
     """
-    return NotImplemented
-
-
+    return 'https://poloclub.github.io/argo-graph-lite/#b2a0dc68-68f3-4567-a858-26ca44ed27d6'
 
 # You should modify __main__ as you see fit to build/test your graph using  the TMDBAPIUtils & Graph classes.
 # Some boilerplate/sample code is provided for demonstration. We will not call __main__ during grading.
@@ -382,8 +418,35 @@ def return_argo_lite_snapshot()->str:
 if __name__ == "__main__":
 
     graph = Graph()
-    graph.add_node(id='2975', name='Laurence Fishburne')
-    tmdb_api_utils = TMDBAPIUtils(api_key='<your API key>')
+    base_actor = {'id':'2975', 'name':'Laurence Fishburne'}
+
+    tmdb_api_utils = TMDBAPIUtils(api_key='68c675b4eb94bd6b2124432798e79f67')
+
+    movie_cast = tmdb_api_utils.get_movie_credits_for_person( base_actor['id'], 8.0)
+
+    for movie in movie_cast:
+        co_actors = tmdb_api_utils.get_movie_cast(movie['id'],3)
+
+        for actor in co_actors:
+            graph.add_node(str(actor['id']), actor['name'])
+            graph.add_edge(str(base_actor['id']),str(actor['id']))
+
+    for n in range(2):
+        if n == 0:
+            work_graph = graph.nodes[:]
+        else:
+            work_graph = [item for item in graph.nodes if item not in work_graph]
+
+        for node in work_graph:
+            print(node[1], len(work_graph))
+            movie_cast = tmdb_api_utils.get_movie_credits_for_person( node[0], 8.0)
+
+            for movie in movie_cast:
+                co_actors = tmdb_api_utils.get_movie_cast(movie['id'],3)
+
+                for actor in co_actors:
+                    graph.add_node(str(actor['id']), actor['name'])
+                    graph.add_edge(str(node[0]),str(actor['id']))
 
     # call functions or place code here to build graph (graph building code not graded)
     # Suggestion: code should contain steps outlined above in BUILD CO-ACTOR NETWORK
@@ -391,6 +454,18 @@ if __name__ == "__main__":
     graph.write_edges_file()
     graph.write_nodes_file()
 
+    total = graph.total_nodes()
+    leaf = graph.count_leaf_nodes()
+
+    print('*** Resumo ***')
+    print( 'Nodes total: {}'.format(total))
+    print('Edges total: {}'.format(graph.total_edges()))
+    print('Max degree: {}'.format(graph.max_degree_nodes()))
+    print( 'Leaf nodes: {}'.format(leaf))
+    print( 'non-leaf nodes: {}'.format( total - leaf ))
+
     # If you have already built & written out your graph, you could read in your nodes & edges files
     # to perform testing on your graph.
     # graph = Graph(with_edges_file="edges.csv", with_nodes_file="nodes.csv")
+
+

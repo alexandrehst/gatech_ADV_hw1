@@ -1,5 +1,5 @@
 import unittest
-from submission import TMDBAPIUtils
+from submission import TMDBAPIUtils, Graph
 
 class Test_Q1(unittest.TestCase):
 
@@ -55,4 +55,59 @@ class Test_Q1(unittest.TestCase):
 
         self.assertEqual( len(movie_cast), 1)
 
+class Test_graph(unittest.TestCase):
+    def test_add_node(self):
+        graph = Graph()
+        graph.add_node(id='2975', name='Laurence Fishburne')
+
+        self.assertEqual( len(graph.nodes), 1)
+
+    def test_add_node_duplicated(self):
+        graph = Graph()
+        graph.add_node(id='2975', name='Laurence Fishburne')
+        graph.add_node(id='2975', name='Laurence Fishburne')
+
+        self.assertEqual( len(graph.nodes), 1)
     
+    def test_add_edges(self):
+        graph = Graph()
+        graph.add_edge('2975', '443')
+
+        check = ('2975', '443')
+
+        self.assertEqual( graph.edges[0], check)
+
+    def test_add_edges_duplicated(self):
+        graph = Graph()
+
+        graph.add_edge('2975', '443')
+        graph.add_edge('2975', '443')
+
+        check = [('2975', '443')]
+
+        self.assertListEqual( graph.edges, check)        
+
+    def test_max_nodes(self):
+        graph = Graph()
+
+        graph.add_edge('1', '2')
+        graph.add_edge('1', '3')
+        graph.add_edge('2', '3')
+        graph.add_edge('4', '1')
+        graph.add_edge('4', '6')
+        graph.add_edge('5', '4')
+
+        max_nodes = graph.max_degree_nodes()
+        check = {'1':3, '4':3}
+
+        self.assertDictEqual( max_nodes, check) 
+    def test_leaf_nodes(self):
+        graph = Graph()
+
+        graph.add_edge('1', '2')
+        graph.add_edge('2', '3')
+        graph.add_edge('1', '4')
+
+        leaf_nodes = graph.count_leaf_nodes()
+
+        self.assertEqual( leaf_nodes, 2)         
