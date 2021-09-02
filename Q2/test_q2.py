@@ -92,3 +92,46 @@ class Test_Q1(unittest.TestCase):
         
         self.assertEqual(resultado, check)
 
+    def test_part_e(self):
+        db = HW2_sql()
+        try:
+            conn = db.create_connection("Q2")
+        except:
+            print("Database Creation Error")        
+
+        resultado = db.part_e(conn)
+        check = (99.392, 'Interstellar', 37)
+        print( '******')
+        print( resultado )
+        
+        self.assertEqual( resultado[0], check )
+
+    def test_part_f(self):
+        db = HW2_sql()
+        try:
+            conn = db.create_connection("Q2")
+        except:
+            print("Database Creation Error")        
+
+        resultado = db.part_f(conn)
+        check = (47698, 'Denis Lawson', '57.56')
+        print( '******')
+        print( resultado )
+        
+        self.assertEqual( resultado[0], check )
+
+    def test_part_g(self):
+        db = HW2_sql()
+        try:
+            conn = db.create_connection("Q2")
+        except:
+            print("Database Creation Error")   
+
+        cursor = conn.cursor()
+        cursor.execute("DROP VIEW IF EXISTS good_collaboration;")
+        conn.commit()                 
+
+        resultado = db.part_g(conn)
+
+        self.assertEqual(resultado, 'Query executed successfully')
+        

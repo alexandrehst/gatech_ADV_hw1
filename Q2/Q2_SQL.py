@@ -191,7 +191,11 @@ class HW2_sql():
     # Part e Find the Highest Scoring Movies With the Least Amount of Cast [4 points]
     def part_e(self,connection):
         ############### EDIT SQL STATEMENT ###################################
-        part_e_sql = ""
+        part_e_sql = "SELECT m.title, m.score, count(mc.cast_id) as total "\
+                     "FROM movies m INNER JOIN movie_cast mc ON m.id = mc.movie_id "\
+                     "GROUP BY m.title "\
+                     "ORDER BY m.score DESC, total, m.title "\
+                     "LIMIT 5;"
         ######################################################################
         cursor = connection.execute(part_e_sql)
         return cursor.fetchall()
@@ -199,7 +203,13 @@ class HW2_sql():
     # Part f Get High Scoring Actors [4 points]
     def part_f(self,connection):
         ############### EDIT SQL STATEMENT ###################################
-        part_f_sql = ""
+        part_f_sql = 'SELECT mc.cast_id, mc.cast_name, printf( "%.2f",AVG(m.score)) AS average_score '\
+                    'FROM movie_cast mc INNER JOIN movies m ON m.id = mc.movie_id '\
+                    'WHERE m.score > 25 '\
+                    'GROUP BY mc.cast_id '\
+                    'HAVING count(m.id) > 2 '\
+                    'ORDER BY average_score DESC, mc.cast_name '\
+                    'LIMIT 10; '        
         ######################################################################
         cursor = connection.execute(part_f_sql)
         return cursor.fetchall()
@@ -207,7 +217,29 @@ class HW2_sql():
     # Part g Creating Views [6 points]
     def part_g(self,connection):
         ############### EDIT SQL STATEMENT ###################################
-        part_g_sql = ""
+        part_g_sql = \
+        """        
+        CREATE VIEW good_collaboration( 
+                                        cast_member_id1, 
+                                        cast_member_id2, 
+                                        movie_count, 
+                                        average_movie_score)
+        AS
+            SELECT
+                mc1.cast_id as actor_a, 
+                mc2.cast_id as actor_b,
+                count(mc1.movie_id) as casted_together,
+                AVG(m.score) as average
+            from movie_cast mc1 
+            join movie_cast mc2 
+                on mc1.movie_id = mc2.movie_id
+                and mc1.cast_id < mc2.cast_id
+            join movies m
+                on mc1.movie_id = m.id
+            group by mc1.cast_id, mc2.cast_id
+            having casted_together > 3 AND average >= 40
+            order by casted_together desc;
+        """
         ######################################################################
         return self.execute_query(connection, part_g_sql)
     
