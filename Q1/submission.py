@@ -410,7 +410,7 @@ def return_argo_lite_snapshot()->str:
     """
     Return the shared URL of your published graph in Argo-Lite
     """
-    return 'https://poloclub.github.io/argo-graph-lite/#b2a0dc68-68f3-4567-a858-26ca44ed27d6'
+    return 'https://poloclub.github.io/argo-graph-lite/#592427a1-bb24-40a3-aac7-0832eb4d96b0'
 
 # You should modify __main__ as you see fit to build/test your graph using  the TMDBAPIUtils & Graph classes.
 # Some boilerplate/sample code is provided for demonstration. We will not call __main__ during grading.
