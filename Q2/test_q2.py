@@ -1,7 +1,7 @@
 import unittest
 from Q2_SQL import HW2_sql
 
-class Test_Q1(unittest.TestCase):
+class Test_Q2(unittest.TestCase):
 
     def test_part_aii_1(self):
         db = HW2_sql()
@@ -100,9 +100,7 @@ class Test_Q1(unittest.TestCase):
             print("Database Creation Error")        
 
         resultado = db.part_e(conn)
-        check = (99.392, 'Interstellar', 37)
-        print( '******')
-        print( resultado )
+        check = ( 'Interstellar', '99.39', 37)
         
         self.assertEqual( resultado[0], check )
 
@@ -134,4 +132,52 @@ class Test_Q1(unittest.TestCase):
         resultado = db.part_g(conn)
 
         self.assertEqual(resultado, 'Query executed successfully')
+
+    def test_part_gi(self):
+        db = HW2_sql()
+        try:
+            conn = db.create_connection("Q2")
+        except:
+            print("Database Creation Error")   
+        check = (47698,'Denis Lawson','49.24')
+        resultado = db.part_gi(conn)
+
+        self.assertEqual(resultado[0], check)        
+        
+    def test_part_h(self):
+        db = HW2_sql()
+        try:
+            conn = db.create_connection("Q2")
+        except:
+            print("Database Creation Error")   
+
+        cursor = conn.cursor()
+        cursor.execute("DROP TABLE movie_overview;")
+        conn.commit()                 
+
+        resultado = db.part_h(conn,"data/movie_overview.csv")
+
+        self.assertEqual( resultado, 297) 
+
+    def test_part_hi(self):
+        db = HW2_sql()
+        try:
+            conn = db.create_connection("Q2")
+        except:
+            print("Database Creation Error")   
+
+        resultado = db.part_hi(conn )
+
+        self.assertEqual( resultado, 8) 
+
+    def test_part_hii(self):
+        db = HW2_sql()
+        try:
+            conn = db.create_connection("Q2")
+        except:
+            print("Database Creation Error")   
+
+        resultado = db.part_hii(conn )
+
+        self.assertEqual( resultado, 2 ) 
         
