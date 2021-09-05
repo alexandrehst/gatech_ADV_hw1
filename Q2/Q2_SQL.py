@@ -262,7 +262,7 @@ class HW2_sql():
         ############### EDIT SQL STATEMENT ###################################
         part_g_i_sql = \
         """
-        SELECT id AS cast_id, bio.cast_name, printf( "%.2f", AVG(average_movie_score)) AS collaboration_score
+        SELECT id AS cast_id, bio.cast_name as cast_name, printf( "%.2f", AVG(average_movie_score)) AS collaboration_score
         FROM
         (
             SELECT cast_member_id1 AS id, average_movie_score
@@ -273,7 +273,7 @@ class HW2_sql():
         ) c
         INNER JOIN cast_bio bio ON c.id = bio.cast_id
         GROUP BY ID
-        ORDER BY collaboration_score DESC
+        ORDER BY collaboration_score DESC, cast_name
         LIMIT 5;
         """
         ######################################################################
@@ -338,7 +338,7 @@ if __name__ == "__main__":
     print('\033[32m' + "Q2 Output: " + '\033[m')
     db = HW2_sql()
     try:
-        conn = db.create_connection("Q2")
+        conn = db.create_connection("teste.db")
     except:
         print("Database Creation Error")
 
