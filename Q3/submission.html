@@ -5,7 +5,15 @@
 
 <head>
   <style>
-    <!-- define CSS rules -->
+    .container {
+      width: 960px;
+      height: 500px;
+      border: 1px solid #720570
+    }
+
+    .bar {
+      fill: #720570;
+    }
   </style>
 </head>
 
@@ -17,6 +25,10 @@
 
 
   <script>
+    container_w = 960
+    container_h = 500
+    padding = 20
+    data = [10,25,32,11]
     // define the dimensions and margins for the graph
 
 
@@ -24,20 +36,28 @@
 	
 
     // create scales x & y for X and Y axis and set their ranges
-
+    const xScale = d3.scaleBand()
+                  .domain(data.map((dataPoint) => dataPoint))
+                  .rangeRound([0, container_w])
+                  .padding(0.1);
+    const yScale = d3.scaleLinear().domain([0,50]).range([container_h,0]);
 
 
     // append svg element to the body of the page
     // set dimensions and position of the svg element
-    var svg = d3.select("body").append("svg") 
+    var svg = d3.select("body").append("svg").classed('container', true)
 
 
     // Get the data
-	var pathToCsv = "";		// path to csv
+
+    var pathToCsv = "q3.csv";		// path to csv
 	
+    
     d3.dsv(",", pathToCsv, function (d) {
       return {
         // format data attributes if required
+        year: new Date(+d.year, 0, 1),
+        running_total: d.running_total
       }
     }).then(function (data) {
       console.log(data); // you should see the data in your browser's developer tools console 
@@ -69,7 +89,30 @@
       console.log(error);
     });
 
+    
+    const bars = svg
+        .selectAll('.bar')
+        .data(data)
+        .enter()
+        .append('rect')
+        .classed('bar', true)
+        .attr('width', xScale.bandwidth())
+        .attr('height', data => container_h - yScale(data))
+        .attr('x', data => xScale(data) + padding)
+        .attr('y', data => yScale(data) - padding)
+    
+    var xAxis = d3.axisBottom(xScale)
+    var yAxis = d3.axisLeft().scale(yScale)
+
+    svg.append('g')
+      .classed('axis', true)
+      .attr('transform', 'translate(0,' + (container_h - padding ) + ')')
+      .call(xAxis)
+
+    svg.append('g')
+      .classed('axis', true)
+      .attr('transform', 'translate(' + padding + ',0)')
+      .call(yAxis)
 
   </script>
-
 </body>

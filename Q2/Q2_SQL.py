@@ -338,7 +338,7 @@ if __name__ == "__main__":
     print('\033[32m' + "Q2 Output: " + '\033[m')
     db = HW2_sql()
     try:
-        conn = db.create_connection("teste.db")
+        conn = db.create_connection("Q2")
     except:
         print("Database Creation Error")
 
