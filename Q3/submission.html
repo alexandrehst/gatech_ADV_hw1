@@ -28,7 +28,6 @@
     container_w = 960
     container_h = 500
     padding = 20
-    data = [10,25,32,11]
     // define the dimensions and margins for the graph
 
 
@@ -36,11 +35,9 @@
 	
 
     // create scales x & y for X and Y axis and set their ranges
-    const xScale = d3.scaleBand()
-                  .domain(data.map((dataPoint) => dataPoint))
-                  .rangeRound([0, container_w])
-                  .padding(0.1);
-    const yScale = d3.scaleLinear().domain([0,50]).range([container_h,0]);
+    const xScale = d3.scaleTime()
+
+    const yScale = d3.scaleLinear()
 
 
     // append svg element to the body of the page
@@ -57,7 +54,7 @@
       return {
         // format data attributes if required
         year: new Date(+d.year, 0, 1),
-        running_total: d.running_total
+        running_total: parseInt( d.running_total)
       }
     }).then(function (data) {
       console.log(data); // you should see the data in your browser's developer tools console 
@@ -65,21 +62,52 @@
       /* Create bar plot using data from csv */
 
       // set the domains of X and Y scales based on data
-      x.domain();
-      y.domain();
+      minDate = d3.min( data, function(d){return d.year})
+      maxDate = d3.max( data, function(d){return d.year})
+      console.log(minDate, maxDate)
+
+      xScale.domain( [minDate, maxDate ])
+                  .range([padding, container_w - 2 * padding]);
+                  //.padding(0.1);
+
+      maxval = d3.max( data, function(d){return d.running_total})
+
+      yScale.domain([0, maxval ]).range([container_h,0]);
+
+      width = (container_w / data.length) *.9;
+      date_padding = (maxDate - minDate) * .1;
+      console.log(width, date_padding); // *****************
 
       // Add bars to svg - create new elements based on your data
       svg.selectAll()
-
-
+        .data(data)
+        .enter()
+        .append('rect')
+        .classed('bar', true)
+        .attr('width', width)
+        .attr('height', data => container_h - yScale(data.running_total))
+        .attr('x', data => xScale(data.year) + padding)
+        .attr('y', data => yScale(data.running_total) - padding)      
+    
+      var xAxis = d3.axisBottom(xScale)
+      var yAxis = d3.axisLeft(yScale)
+    
       // Add the X Axis
-      svg.append()
-
+      svg.append('g')
+        .classed('axis', true)
+        .attr( 'id', 'x_axis')
+        .attr('transform', 'translate(0,' + (container_h - padding ) + ')')
+        .call(xAxis)
+      
       // Add the text label for X Axis
       svg.append()
 
       // Add the Y Axis
-      svg.append()
+      svg.append('g')
+        .classed('axis', true)
+        .attr( 'id', 'y_axis')        
+        .attr('transform', 'translate(' + padding + ',0)')
+        .call(yAxis)
 
       // Add the text label for Y axis
       svg.append()
@@ -89,7 +117,7 @@
       console.log(error);
     });
 
-    
+    /*
     const bars = svg
         .selectAll('.bar')
         .data(data)
@@ -100,19 +128,8 @@
         .attr('height', data => container_h - yScale(data))
         .attr('x', data => xScale(data) + padding)
         .attr('y', data => yScale(data) - padding)
-    
-    var xAxis = d3.axisBottom(xScale)
-    var yAxis = d3.axisLeft().scale(yScale)
+    */
 
-    svg.append('g')
-      .classed('axis', true)
-      .attr('transform', 'translate(0,' + (container_h - padding ) + ')')
-      .call(xAxis)
-
-    svg.append('g')
-      .classed('axis', true)
-      .attr('transform', 'translate(' + padding + ',0)')
-      .call(yAxis)
 
   </script>
 </body>
