@@ -252,7 +252,7 @@ class HW2_sql():
             join movies m
                 on mc1.movie_id = m.id
             group by mc1.cast_id, mc2.cast_id
-            having casted_together > 3 AND average >= 40
+            having casted_together >= 3 AND average >= 40
             order by casted_together desc;
         """
         ######################################################################

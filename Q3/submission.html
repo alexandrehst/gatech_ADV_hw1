@@ -25,8 +25,12 @@
 
 
   <script>
-    container_w = 960
-    container_h = 500
+    container_w = 960;
+    container_h = 500;
+    const margin = { top:15, right: 15, bottom: 20, left:60};
+    const innerWidth = container_w - margin.left - margin.right;
+    const innerHeight = container_h - margin.top - margin.bottom;
+
     padding = 20
     // define the dimensions and margins for the graph
 
@@ -35,15 +39,18 @@
 	
 
     // create scales x & y for X and Y axis and set their ranges
-    const xScale = d3.scaleTime()
-
-    const yScale = d3.scaleLinear()
-
+    var xScale = d3.scaleTime()
+    var yScale = d3.scaleLinear()
 
     // append svg element to the body of the page
     // set dimensions and position of the svg element
-    var svg = d3.select("body").append("svg").classed('container', true)
-
+    var svg = d3.select("body")
+              .append("svg")
+              .attr('id', 'svg')
+              //.classed('container', true)
+              .attr('width', container_w)
+              .attr('height', container_h)
+              .append('g')
 
     // Get the data
 
@@ -67,68 +74,91 @@
       console.log(minDate, maxDate)
 
       xScale.domain( [minDate, maxDate ])
-                  .range([padding, container_w - 2 * padding]);
-                  //.padding(0.1);
+                  .range([margin.left, container_w - margin.right ]);
 
       maxval = d3.max( data, function(d){return d.running_total})
-
-      yScale.domain([0, maxval ]).range([container_h,0]);
-
-      width = (container_w / data.length) *.9;
+      console.log( maxval);
+      yScale.domain([0, maxval]).range([innerHeight,0]);
+      
+      width = (innerWidth / data.length) *.9;
       date_padding = (maxDate - minDate) * .1;
       console.log(width, date_padding); // *****************
+    
+
 
       // Add bars to svg - create new elements based on your data
-      svg.selectAll()
+      svg.append('g')
+        .selectAll('rect')
         .data(data)
         .enter()
         .append('rect')
         .classed('bar', true)
         .attr('width', width)
-        .attr('height', data => container_h - yScale(data.running_total))
-        .attr('x', data => xScale(data.year) + padding)
-        .attr('y', data => yScale(data.running_total) - padding)      
+        .attr('height', data => innerHeight - yScale(data.running_total))
+        .attr('x', data => xScale(data.year))
+        .attr('y', data => yScale(data.running_total) )      
     
       var xAxis = d3.axisBottom(xScale)
       var yAxis = d3.axisLeft(yScale)
-    
+
+      svg.append('g')
+        .append('text')
+        .attr('id', 'title')
+        .attr('y', margin.top)
+        .attr("text-anchor", "middle")
+        .attr("x", container_w / 2)
+        .text('Running Total of TMDb Movies by Year');
+
+      svg.append('g')
+        .append('title')
+        .text('Running Total of TMDb Movies by Year')
+
       // Add the X Axis
       svg.append('g')
+        .call(xAxis)
         .classed('axis', true)
         .attr( 'id', 'x_axis')
-        .attr('transform', 'translate(0,' + (container_h - padding ) + ')')
-        .call(xAxis)
-      
+        .attr('transform', `translate(0, ${innerHeight})`)
+        
       // Add the text label for X Axis
-      svg.append()
+      svg.append("g")
+        .append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "middle")
+        .attr("x", container_w / 2)
+        .attr("y", container_h - 5)
+        .attr( "id", "x_axis_label")
+        .text("Year");
+      
+      svg.append("g")
+        .append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "start")
+        .attr("x", innerWidth)
+        .attr("y", container_h - 5)
+        .attr("id", "credit")
+        .text("atorres78");
 
       // Add the Y Axis
       svg.append('g')
+        .call(yAxis)
         .classed('axis', true)
         .attr( 'id', 'y_axis')        
-        .attr('transform', 'translate(' + padding + ',0)')
-        .call(yAxis)
-
+        .attr('transform', `translate( ${margin.left},0)`)
+       
       // Add the text label for Y axis
-      svg.append()
+      svg.append("g")
+        .append("text")
+        .attr( 'id', 'y_axis_label')
+        .attr("class", "x label")
+        .attr("text-anchor", "middle")
+        .text("Running Total")
+        .attr("transform", `translate(15, ${container_h / 2})rotate(-90)`);
 
 
     }).catch(function (error) {
       console.log(error);
     });
-
-    /*
-    const bars = svg
-        .selectAll('.bar')
-        .data(data)
-        .enter()
-        .append('rect')
-        .classed('bar', true)
-        .attr('width', xScale.bandwidth())
-        .attr('height', data => container_h - yScale(data))
-        .attr('x', data => xScale(data) + padding)
-        .attr('y', data => yScale(data) - padding)
-    */
 
 
   </script>
