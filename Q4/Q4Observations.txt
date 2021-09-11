@@ -1,0 +1,6 @@
+i.rows: 47
+ii.columns: 5
+iii.function: ngram-fingerprint, 120
+iv.GREL_categoryname: if( isNull(value)), 'Unknown', value)
+v.GREL_highpriced: if(value.toNumber() > 90, 1,0)
+vi.GREL_hasoffer: if( or( value.toLowercase().indexOf('discount') > -1, value.toLowercase().indexOf('offer') > -1, value.toLowercase().indexOf('sale') > -1 ), 1, 0)
